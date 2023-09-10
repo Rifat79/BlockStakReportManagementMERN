@@ -14,8 +14,16 @@ const UserSchema = mongoose.Schema({
     phone: String,
     profession: String,
     favourite_colors: Array,
-    created: { type: Date, default: Date.now },
-    is_admin: { type: Boolean, required: true }
+    is_admin: { type: Boolean, required: true },
+    created_at: { 
+        type: Date, 
+        immutable: true, 
+        default: Date.now 
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    },
 })
 
 const User = mongoose.model('users', UserSchema);
