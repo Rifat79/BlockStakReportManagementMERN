@@ -9,7 +9,7 @@ function createRefreshToken(user) {
     return jwt.sign({ user }, token_credentials.refresh_token_secret, { expiresIn: token_credentials.refresh_token_lifetime });
 }
 
-const validateEmail = (email) => {
+function validateEmail(email) {
     return String(email)
         .toLowerCase()
         .match(
@@ -17,8 +17,17 @@ const validateEmail = (email) => {
         );
 };
 
+function validatePhone(phone) {
+    return String(phone)
+        .match(
+            /(^(\+88|0088)?(01){1}[3456789]{1}(\d){8})$/
+
+        );
+}
+
 module.exports = {
     createJwtToken,
     createRefreshToken,
-    validateEmail
+    validateEmail,
+    validatePhone
 }

@@ -31,7 +31,7 @@ app.listen(SERVER_RUNNING_PORT, () => {
 
 // error handler middleware
 app.use(function errorHandler(err, req, res, next) {
-    let response = {};
+    let response = { message: 'Internal server error' };
     console.log("Internal server error");
     console.log(err);
     response.success = false;
