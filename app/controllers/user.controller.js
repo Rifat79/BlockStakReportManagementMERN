@@ -1,4 +1,5 @@
 const { connectToDb } = require("../library/db.connection");
+const log_write = require("../library/log");
 const User = require("../models/UserModel");
 
 
@@ -21,7 +22,7 @@ exports.getUsers = async (req, res) => {
         console.log(err.message);
         return res.status(500).json({ message: err.message });
     } finally {
-
+        log_write(req, "logs", "get_users", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
     }
 }
 
@@ -68,7 +69,7 @@ exports.createUser = async (req, res) => {
         response.message = err.message;
         return res.status(500).json(response)
     } finally {
-
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
     }
 }
 
@@ -130,7 +131,7 @@ exports.updateUser = async (req, res) => {
         response.message = err.message
         return res.status(500).json({ success: false, message: err.message })
     } finally {
-
+        log_write(req, "logs", "update_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
     }
 }
 
@@ -168,6 +169,6 @@ exports.deleteUser = async (req, res) => {
         response.message = err.message;
         return res.status(500).json(response);
     } finally {
-
+        log_write(req, "logs", "delete_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
     }
 }

@@ -5,18 +5,27 @@ const User = require('../models/UserModel');
 const { connectToDb } = require('../library/db.connection');
 const { createJwtToken, createRefreshToken } = require('../library/helper');
 const { token_credentials } = require('../config');
+const log_write = require('../library/log');
 
 exports.renewToken = async (req, res) => {
+    let response = {
+        success: false
+    };
+
     const refreshToken = req.body.refreshToken;
 
     if(!refreshToken) {
-        return res.status(400).json({ message: "'refreshToken' is empty!" });
+        response.message = "'refreshToken' is empty!";
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     }
 
     // Verify the refresh token
     jwt.verify(refreshToken, token_credentials.refresh_token_secret, (err, decoded) => {
         if (err) {
-            return res.status(401).json({ message: 'Token refresh failed' });
+            response.message = 'Token refresh failed';
+            log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+            return res.status(401).json(response);
         }
 
         // Generate a new JWT token with a 1-hour expiration
@@ -25,11 +34,19 @@ exports.renewToken = async (req, res) => {
         // Set the new JWT token as an HttpOnly cookie
         res.cookie('jwt', newJwtToken, { httpOnly: true, maxAge: 3600000 }); // 1 hour
 
-        res.json({ message: 'Token refreshed successfully', refreshToken });
+        response.success = true;
+        response.message = 'Token refreshed successfully';
+        response.refreshToken = refreshToken;
+        log_write(req, "logs", "renew_token", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        res.status(200).json(response);
     });
 }
 
 exports.registerUser = async (req, res) => {
+    let response = {
+        success: false
+    };
+
     try {
         const { name, email, phone, profession, address, favourite_colors, is_admin, password } = req.body;
 
@@ -39,7 +56,8 @@ exports.registerUser = async (req, res) => {
 
         const existingUser = await User.findOne({email});
         if (existingUser) {
-            return res.status(403).json({message: 'Email already exists!'});
+            response.message = 'Email already exists!';
+            return res.status(403).json(response);
         }
 
         const newUser = new User({
@@ -62,16 +80,25 @@ exports.registerUser = async (req, res) => {
         // Set the JWT token as an HttpOnly cookie
         res.cookie('jwt', token, { httpOnly: true, maxAge: 3600000 }); // 1 hour
 
-        res.status(201).json({ message: 'Registration successful', userData, refreshToken });
+        response.success = true;
+        response.message = 'Registration successful';
+        response.userData = userData;
+        response.refreshToken = refreshToken;
+        res.status(201).json(response);
     } catch (err) {
         console.log("catch block error: '/register' => ", err.message);
-        res.status(500).json({ success: false, message: err.message })
+        response.message = err.message;
+        res.status(500).json(message);
     } finally {
-
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
     }
 };
 
 exports.login = async (req, res) => {
+    let response = {
+        success: false
+    };
+
     try {
         const { email, password } = req.body;
 
@@ -81,14 +108,16 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ message: 'Authentication failed' });
+            response.message = 'Authentication failed';
+            return res.status(401).json(response);
         }
 
         // Verify the provided password against the hashed password in the database
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Wrong password' });
+            response.message = 'Wrong password';
+            return res.status(401).json(response);
         }
 
         // Generate a JWT token with a 1-hour expiry time
@@ -98,11 +127,15 @@ exports.login = async (req, res) => {
         // Set the JWT token as an HttpOnly cookie
         res.cookie('jwt', jwtToken, { httpOnly: true, maxAge: 3600000 }); // 1 hour
 
-        res.json({ message: 'Login successful', refreshToken });
+        response.success = true;
+        response.message = 'Login successful';
+        response.refreshToken = refreshToken;
+        return res.status(200).json(response);
     } catch (err) {
         console.log("catch block error: '/login' => ", err.message);
-        res.status(500).json({ success: false, message: err.message })
+        response.message = err.message;
+        return res.status(500).json(response);
     } finally {
-
+        log_write(req, "logs", "login", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
     }
 }
