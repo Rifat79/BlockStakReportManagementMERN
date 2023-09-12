@@ -1,7 +1,11 @@
 const bcrypt = require('bcrypt');
 const { validateEmail, validatePhone } = require("../library/helper");
+const log_write = require('../library/log');
 
 async function verify_create_user_req(req, res, next) {
+    let response = {
+        success: false
+    };
 
     const {
         name,
@@ -15,21 +19,37 @@ async function verify_create_user_req(req, res, next) {
     } = req.body;
 
     if(typeof(name) !== 'string' || name.length === 0) {
-        return res.status(400).json({ message: "Invalid data type for field 'name'!" });
+        response.message = "Invalid data type for field 'name'!";
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (typeof (email) !== 'string' || !validateEmail(email)) {
-        return res.status(400).json({ message: "Invalid value for field 'email'!" });
+        response.message = "Invalid value for field 'email'!";
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if(typeof(password) !== 'string' || password.length < 6) {
-        return res.status(400).json({ message: "Password can not be empty and should contain at least 6 characters!" });
+        response.message = "Password can not be empty and should contain at least 6 characters!" ;
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (typeof (is_admin) !== 'boolean') {
-        return res.status(400).json({ message: "Invalid data type for field 'is_admin'!" });
+        response.message = "Invalid data type for field 'is_admin'!" ;
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if(typeof(profession) === 'string' && profession.length === 0) {
-        return res.status(400).json({ message: "profession can not be empty!" });
+        response.message = "profession can not be empty!";
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (typeof (address) === 'string' && address.length === 0) {
-        return res.status(400).json({ message: "address can not be empty!" });
+        response.message = "address can not be empty!" ;
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if(Array.isArray(favourite_colors) && favourite_colors.length === 0) {
-        return res.status(400).json({ message: "Favourite colors should contain at least one color!" });
+        response.message = "Favourite colors should contain at least one color!";
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if(typeof(phone) === 'string' && !validatePhone(phone)) {
-        return res.status(400).json({ message: "Invalid phone no!" });
+        response.message = "Invalid phone no!"
+        log_write(req, "logs", "create_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     }
 
     let newUser = {};
@@ -65,6 +85,9 @@ async function verify_create_user_req(req, res, next) {
 }
 
 function verify_user_update_req(req, res, next) {
+    let response = {
+        success: false
+    };
 
     const {
         name,
@@ -77,25 +100,36 @@ function verify_user_update_req(req, res, next) {
     } = req.body;
 
     if (name !== undefined && typeof (name) !== 'string') {
-        return res.status(400).json({ message: "Invalid data type for field 'name'!" });
+        response.message = "Invalid data type for field 'name'!" ;
+        log_write(req, "logs", "update_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (typeof (name) === 'string' && name.length === 0) {
-        return res.status(400).json({ message: "Name can not be empty!" });
+        response.message = "Name can not be empty!" ;
+        return res.status(400).json(response);
     } else if (email !== undefined && !validateEmail(email)) {
-        return res.status(400).json({ message: "Invalid value for field 'email'!" });
+        response.message = "Invalid value for field 'email'!" ;
+        return res.status(400).json(response);
     } else if (phone !== undefined && !validatePhone(phone)) {
-        return res.status(400).json({ message: "Invalid 'msisdn'!" });
+        response.message = "Invalid 'msisdn'!";
+        return res.status(400).json(response);
     } else if (profession !== undefined && typeof (profession) !== 'string') {
-        return res.status(400).json({ message: "Invalid data type for field 'profession'!" });
+        response.message = "Invalid data type for field 'profession'!" ;
+        return res.status(400).json(response);
     } else if (typeof (profession) === 'string' && profession.length === 0) {
-        return res.status(400).json({ message: "profession can not be empty!" });
+        response.message = "profession can not be empty!" ;
+        return res.status(400).json(response);
     } else if (address !== undefined && typeof (address) !== 'string') {
-        return res.status(400).json({ message: "Invalid data type for field 'address'!" });
+        response.message = "Invalid data type for field 'address'!" ;
+        return res.status(400).json(response);
     } else if (typeof (address) === 'string' && address.length === 0) {
-        return res.status(400).json({ message: "address can not be empty!" });
+        response.message = "address can not be empty!" ;
+        return res.status(400).json(response);
     } else if (favourite_colors !== undefined && !Array.isArray(favourite_colors)) {
-        return res.status(400).json({ message: "Invalid data type for field 'favourite_colors'!" });
+        response.message = "Invalid data type for field 'favourite_colors'!" ;
+        return res.status(400).json(response);
     } else if (is_admin !== undefined && typeof (is_admin) !== 'boolean') {
-        return res.status(400).json({ message: "Invalid data type for field 'is_admin'!" });
+        response.message = "Invalid data type for field 'is_admin'!";
+        return res.status(400).json(response);
     }
 
     const setter = {};

@@ -2,18 +2,27 @@
 const jwt = require('jsonwebtoken');
 const { token_credentials } = require('../config');
 const { validateEmail } = require('../library/helper');
+const log_write = require('../library/log');
 
 function authenticate(req, res, next) {
+    let response = {
+        success: false
+    };
+
     const token = req.cookies.jwt;
     console.log({ token })
 
     if (!token) {
-        return res.status(401).json({ message: 'Authentication required' });
+        response.message = 'Authentication required!';
+        log_write(req, "logs", "authenticate_middleware", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(401).json(response);
     }
 
     jwt.verify(token, token_credentials.access_token_secret, (err, decoded) => {
         if (err) {
-            return res.status(401).json({ message: 'Authentication failed' });
+            response.message = 'Authentication failed!';
+            log_write(req, "logs", "authenticate_middleware", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+            return res.status(401).json(response);
         }
         console.log({ decoded })
         req.userInfo = decoded;
@@ -22,6 +31,10 @@ function authenticate(req, res, next) {
 }
 
 function verify_registration_data(req, res, next) {
+    let response = {
+        success: false
+    };
+
     const {
         name,
         email,
@@ -34,35 +47,59 @@ function verify_registration_data(req, res, next) {
     } = req.body;
 
     if (!name) {
-        return res.status(400).json({ message: 'User name is required!' })
+        response.message = 'User name is required!';
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response)
     } else if (!email) {
-        return res.status(400).json({ message: 'Email is required!' })
+        response.message = 'Email is required!';
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (!phone) {
-        return res.status(400).json({ message: 'Phone no. is required!' })
+        response.message = 'Phone no. is required!';
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (!password) {
-        return res.status(400).json({ message: 'Password is empty!' })
+        response.message = 'Password is empty!';
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (password.lenght < 6) {
-        return res.status(400).json({ message: 'Password must be 6 characters long!' })
+        response.message = 'Password must be 6 characters long!';
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     } else if (!validateEmail(email)) {
-        return res.status(400).json({ message: 'Invalid email address!' })
+        response.message = 'Invalid email address!';
+        log_write(req, "logs", "register_user", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response);
     }
 
     next();
 }
 
 function verify_login_data(req, res, next) {
+    let response = {
+        success: false
+    };
+
     const {
         email,
         password
     } = req.body;
     if (!email) {
-        return res.status(400).json({ message: 'Email is required!' })
+        response.message = 'Email is required!';
+        log_write(req, "logs", "login", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response)
     } else if (!password) {
-        return res.status(400).json({ message: 'Password is empty!' })
+        response.message = 'Password is empty!';
+        log_write(req, "logs", "login", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response)
     } else if (password.lenght < 6) {
-        return res.status(400).json({ message: 'Password must be 6 characters long!' })
+        response.message = 'Password must be 6 characters long!';
+        log_write(req, "logs", "login", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response)
     } else if (!validateEmail(email)) {
-        return res.status(400).json({ message: 'Invalid email address!' })
+        response.message = 'Invalid email address!';
+        log_write(req, "logs", "login", "REQ_RES_", JSON.stringify(req.body) + "|" + JSON.stringify(response));
+        return res.status(400).json(response)
     }
 
     next();
